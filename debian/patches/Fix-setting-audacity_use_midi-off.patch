@@ -1,0 +1,68 @@
+From: Benjamin Drung <benjamin.drung@canonical.com>
+Date: Thu, 29 Sep 2022 11:05:41 +0200
+Subject: Fix setting audacity_use_midi=off
+
+When disabling MIDI support, cmake will fail:
+
+```
+$ cmake -B build -Daudacity_use_midi=off
+[...]
+CMake Error at cmake-proxies/CMakeLists.txt:314 (message):
+  EXPERIMENTAL_MIDI_OUT requires USE_MIDI
+```
+
+Disable `EXPERIMENTAL_MIDI_OUT` in case MIDI support was explicitly
+disabled.
+
+Forwarded: https://github.com/audacity/audacity/pull/3717
+Signed-off-by: Benjamin Drung <benjamin.drung@canonical.com>
+---
+ src/Experimental.cmake | 28 ++++++++++++++++------------
+ 1 file changed, 16 insertions(+), 12 deletions(-)
+
+diff --git a/src/Experimental.cmake b/src/Experimental.cmake
+index b82b38e..28fad38 100644
+--- a/src/Experimental.cmake
++++ b/src/Experimental.cmake
+@@ -69,18 +69,6 @@ set( EXPERIMENTAL_OPTIONS_LIST
+    # Paul Licameli (PRL) 29 Nov 2014
+    #IMPROVED_SEEKING
+ 
+-   #MIDI_IN
+-
+-   # JKC, 17 Aug 2017
+-   # Enables the MIDI note stretching feature, which currently
+-   # a) Is broken on Linux (Bug 1646)
+-   # b) Crashes with Sync-Lock (Bug 1719)
+-   # c) Needs UI design review.
+-   #MIDI_STRETCHING
+-
+-   # USE_MIDI must be defined in order for SCOREALIGN to work
+-   #SCOREALIGN
+-
+    #Automatically tries to find an acceptable input volume
+    #AUTOMATED_INPUT_LEVEL_ADJUSTMENT
+ 
+@@ -108,6 +96,22 @@ set( EXPERIMENTAL_OPTIONS_LIST
+    # EASY_CHANGE_KEY_BINDINGS
+ )
+ 
++if( NOT audacity_use_midi STREQUAL "off" )
++   list( APPEND EXPERIMENTAL_OPTIONS_LIST
++   #MIDI_IN
++
++   # JKC, 17 Aug 2017
++   # Enables the MIDI note stretching feature, which currently
++   # a) Is broken on Linux (Bug 1646)
++   # b) Crashes with Sync-Lock (Bug 1719)
++   # c) Needs UI design review.
++   #MIDI_STRETCHING
++
++   # USE_MIDI must be defined in order for SCOREALIGN to work
++   #SCOREALIGN
++  )
++endif()
++
+ # Now define the flags
+ list( TRANSFORM EXPERIMENTAL_OPTIONS_LIST PREPEND "EXPERIMENTAL_"  )
+ add_compile_definitions( ${EXPERIMENTAL_OPTIONS_LIST} )
