@@ -165,7 +165,7 @@ diff --git a/libraries/lib-module-manager/ModuleSettings.cpp b/libraries/lib-mod
 index 28125ba..0853dcc 100644
 --- a/libraries/lib-module-manager/ModuleSettings.cpp
 +++ b/libraries/lib-module-manager/ModuleSettings.cpp
-@@ -86,7 +86,8 @@ static const std::unordered_set<wxString> &autoEnabledModules()
+@@ -86,6 +86,7 @@ static const std::unordered_set<wxString> &autoEnabledModules()
        "mod-midi-import-export",
        "mod-cloud-audiocom",
 -      "mod-musehub-ui"
