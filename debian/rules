@@ -4,6 +4,7 @@ include /usr/share/dpkg/architecture.mk
 include /usr/share/dpkg/pkg-info.mk
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_BUILD_OPTIONS = parallel=2
 
 CMAKE_FLAGS = \
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -59,6 +60,7 @@ endif
 	dh_clean libraries/lib-theme-resources/*Code.h
 
 override_dh_auto_configure:
+	./openvino.sh
 ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 	cmake -B obj-$(DEB_BUILD_GNU_TYPE) -DCMAKE_VERBOSE_MAKEFILE=ON $(CMAKE_FLAGS) $(DISABLE_LIBRARIES)
 	cmake --build obj-$(DEB_BUILD_GNU_TYPE) --target image-compiler
@@ -68,3 +70,13 @@ endif
 execute_after_dh_auto_install:
 	# Don't package unnecessary copy of GPL
 	rm debian/tmp/usr/share/doc/audacity/LICENSE.txt
+	
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info -l/tmp/openvino/openvino_toolkit/l_openvino_toolkit_ubuntu22_2024.6.0.17404.4c0f47d2335_x86_64/runtime/lib/intel64/
+	cp /tmp/openvino/whisper-build/installed/lib/libwhisper.so debian/audacity-ai/usr/lib/audacity
+	rsync -ax /tmp/openvino/libtorch/libtorch/lib/ debian/audacity-ai/usr/lib/audacity
+	rsync -ax /tmp/openvino/openvino_toolkit/l_openvino_toolkit_ubuntu22_2024.6.0.17404.4c0f47d2335_x86_64/runtime/3rdparty/tbb/lib/ debian/audacity-ai/usr/lib/audacity
+	rsync -ax /tmp/openvino/openvino_toolkit/l_openvino_toolkit_ubuntu22_2024.6.0.17404.4c0f47d2335_x86_64/runtime/lib/intel64/ debian/audacity-ai/usr/lib/audacity
+	
+
+
